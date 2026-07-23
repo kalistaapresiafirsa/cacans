@@ -26,7 +26,7 @@
       padding: 1.5rem;
     }
 
-    /* Kartu utama – elegan, transparan dengan efek kaca */
+    /* Kartu utama */
     .card {
       max-width: 860px;
       width: 100%;
@@ -42,13 +42,13 @@
       text-align: center;
     }
 
-    /* --- Video Streaming HD --- */
+    /* --- Video Webcam --- */
     .video-wrapper {
       width: 100%;
       border-radius: 40px;
       overflow: hidden;
       box-shadow: 0 16px 32px -12px rgba(90, 50, 30, 0.35);
-      margin-bottom: 1.8rem;
+      margin-bottom: 0.8rem;
       border: 2px solid rgba(255, 235, 215, 0.5);
       background: #0a0a0a;
       aspect-ratio: 16 / 9;
@@ -60,11 +60,12 @@
       transform: scale(1.005);
     }
 
-    .video-wrapper iframe {
+    .video-wrapper video {
       width: 100%;
       height: 100%;
       display: block;
-      border: none;
+      object-fit: cover;
+      background: #1a1a1a;
     }
 
     /* Badge HD di pojok video */
@@ -94,7 +95,7 @@
       color: #ffd700;
     }
 
-    /* Tombol kontrol kualitas (opsional) */
+    /* Indikator kualitas & status */
     .quality-control {
       position: absolute;
       bottom: 14px;
@@ -120,43 +121,117 @@
       font-size: 0.8rem;
     }
 
-    /* Link alternatif di bawah video */
-    .video-links {
-      margin: -0.6rem 0 1.2rem;
-      font-size: 0.85rem;
-      color: #7f6a5c;
-      opacity: 0.8;
+    /* Status kamera */
+    .camera-status {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(8px);
+      color: #fff;
+      padding: 4px 12px;
+      border-radius: 30px;
+      font-size: 0.65rem;
+      font-weight: 600;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      pointer-events: none;
+    }
+
+    .camera-status .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+      animation: pulse-dot 1.5s ease-in-out infinite;
+    }
+
+    .dot.active {
+      background: #4caf50;
+    }
+
+    .dot.inactive {
+      background: #f44336;
+      animation: none;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
+    }
+
+    /* Tombol kontrol kamera */
+    .camera-controls {
       display: flex;
       justify-content: center;
       gap: 1rem;
+      margin: 0.8rem 0 1.2rem;
       flex-wrap: wrap;
     }
 
-    .video-links a {
-      color: #7f5f4a;
-      text-decoration: none;
-      font-weight: 500;
-      padding: 4px 12px;
-      border-radius: 30px;
-      background: rgba(255, 235, 215, 0.3);
-      transition: all 0.2s ease;
+    .cam-btn {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
+      padding: 0.5rem 1.8rem;
+      border-radius: 60px;
+      border: 1px solid rgba(255, 215, 190, 0.3);
+      background: rgba(255, 242, 232, 0.6);
+      backdrop-filter: blur(4px);
+      font-family: 'Quicksand', sans-serif;
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: #3d2a1e;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      box-shadow: 0 4px 10px -4px rgba(130, 70, 40, 0.06);
     }
 
-    .video-links a:hover {
-      background: rgba(255, 215, 190, 0.5);
-      color: #5a3f2e;
-      transform: translateY(-1px);
+    .cam-btn:hover {
+      background: rgba(255, 230, 215, 0.8);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px -8px rgba(160, 90, 60, 0.2);
     }
 
-    .video-links i {
+    .cam-btn i {
+      font-size: 1.1rem;
       color: #b45f48;
-      font-size: 0.8rem;
     }
 
-    /* Avatar dengan sentuhan gradien */
+    .cam-btn.start {
+      background: linear-gradient(135deg, #4caf50, #388e3c);
+      color: #fff;
+      border-color: #4caf50;
+    }
+
+    .cam-btn.start i {
+      color: #fff;
+    }
+
+    .cam-btn.start:hover {
+      background: linear-gradient(135deg, #66bb6a, #43a047);
+      box-shadow: 0 8px 20px -8px rgba(76, 175, 80, 0.4);
+    }
+
+    .cam-btn.stop {
+      background: linear-gradient(135deg, #ef5350, #c62828);
+      color: #fff;
+      border-color: #ef5350;
+    }
+
+    .cam-btn.stop i {
+      color: #fff;
+    }
+
+    .cam-btn.stop:hover {
+      background: linear-gradient(135deg, #e57373, #d32f2f);
+      box-shadow: 0 8px 20px -8px rgba(239, 83, 80, 0.4);
+    }
+
+    /* Avatar */
     .avatar-frame {
       position: relative;
       display: inline-block;
@@ -186,7 +261,6 @@
       transform: scale(1.02) rotate(-3deg);
     }
 
-    /* Gelombang tangan */
     .wave-icon {
       display: inline-block;
       font-size: 1.9rem;
@@ -221,7 +295,6 @@
       font-weight: 700;
     }
 
-    /* Badge profesi */
     .badge-profesi {
       display: inline-block;
       background: rgba(190, 120, 90, 0.15);
@@ -252,7 +325,6 @@
       opacity: 0.5;
     }
 
-    /* Bio singkat */
     .bio {
       font-size: 1.1rem;
       line-height: 1.7;
@@ -272,7 +344,6 @@
       margin: 0 4px;
     }
 
-    /* Grid fitur */
     .feature-grid {
       display: flex;
       flex-wrap: wrap;
@@ -310,7 +381,6 @@
       box-shadow: 0 12px 20px -10px rgba(160, 90, 60, 0.15);
     }
 
-    /* Tombol Instagram – tautan langsung */
     .ig-button {
       display: inline-flex;
       align-items: center;
@@ -347,7 +417,6 @@
       transform: scale(1.1) rotate(-4deg);
     }
 
-    /* Footer dengan info tambahan */
     .footnote {
       margin-top: 2.4rem;
       font-size: 0.9rem;
@@ -415,7 +484,7 @@
       }
       .video-wrapper {
         border-radius: 28px;
-        margin-bottom: 1.2rem;
+        margin-bottom: 0.8rem;
       }
       .hd-badge {
         top: 10px;
@@ -428,6 +497,16 @@
         right: 10px;
         padding: 4px 10px;
         font-size: 0.6rem;
+      }
+      .camera-status {
+        top: 10px;
+        left: 10px;
+        padding: 3px 10px;
+        font-size: 0.55rem;
+      }
+      .cam-btn {
+        padding: 0.4rem 1.2rem;
+        font-size: 0.8rem;
       }
     }
 
@@ -459,19 +538,11 @@
 </head>
 <body>
   <div class="card">
-    <!-- === VIDEO STREAMING HD === -->
+    <!-- === VIDEO WEBCAM === -->
     <div class="video-wrapper">
-      <!-- iframe dengan parameter untuk kualitas HD -->
-      <iframe 
-        src="http://10.101.209.89?quality=high&hd=1&res=1080p" 
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen" 
-        allowfullscreen
-        loading="lazy"
-        title="Live Streaming HD - Caca Cans"
-        sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
-      ></iframe>
+      <video id="webcam" autoplay playsinline muted></video>
       
-      <!-- Badge HD di pojok video -->
+      <!-- Badge HD -->
       <div class="hd-badge">
         <i class="fas fa-star"></i> HD <i class="fas fa-star" style="margin-left:2px;"></i>
       </div>
@@ -480,19 +551,22 @@
       <div class="quality-control">
         <i class="fas fa-cog"></i> 1080p
       </div>
+
+      <!-- Status kamera -->
+      <div class="camera-status" id="cameraStatus">
+        <span class="dot inactive" id="statusDot"></span>
+        <span id="statusText">Offline</span>
+      </div>
     </div>
 
-    <!-- Link alternatif dan informasi video -->
-    <div class="video-links">
-      <a href="http://10.101.209.89" target="_blank">
-        <i class="fas fa-external-link-alt"></i> Buka streaming langsung
-      </a>
-      <a href="http://10.101.209.89" target="_blank">
-        <i class="fas fa-expand"></i> Layar penuh
-      </a>
-      <span style="display:flex;align-items:center;gap:4px;color:#7f6a5c;font-size:0.75rem;">
-        <i class="fas fa-circle" style="color:#4caf50;font-size:0.5rem;"></i> LIVE
-      </span>
+    <!-- Kontrol Kamera -->
+    <div class="camera-controls">
+      <button class="cam-btn start" id="startBtn">
+        <i class="fas fa-play"></i> Mulai Kamera
+      </button>
+      <button class="cam-btn stop" id="stopBtn">
+        <i class="fas fa-stop"></i> Hentikan
+      </button>
     </div>
 
     <!-- Avatar -->
@@ -502,7 +576,7 @@
       </div>
     </div>
 
-    <!-- Nama dengan aksen -->
+    <!-- Nama -->
     <h1>
       <span class="highlight">Caca Cans</span>
       <span class="wave-icon">👋</span>
@@ -515,7 +589,7 @@
 
     <div class="divider"></div>
 
-    <!-- Deskripsi singkat -->
+    <!-- Deskripsi -->
     <div class="bio">
       <i class="fas fa-quote-left" style="opacity:0.4; margin-right: 6px;"></i>
       Menulis ulang cerita, satu <i class="fas fa-heart" style="color:#d47a62;"></i> 
@@ -523,7 +597,7 @@
       <i class="fas fa-quote-right" style="opacity:0.4; margin-left: 6px;"></i>
     </div>
 
-    <!-- Grid nilai / vibe -->
+    <!-- Grid fitur -->
     <div class="feature-grid">
       <div class="feature-item">
         <i class="fas fa-camera-retro"></i> Momen
@@ -539,7 +613,7 @@
       </div>
     </div>
 
-    <!-- Tombol ke Instagram @aprfkalista (tautan aktif) -->
+    <!-- Instagram -->
     <a href="https://instagram.com/aprfkalista" target="_blank" class="ig-button">
       <i class="fab fa-instagram"></i> @aprfkalista
       <i class="fas fa-arrow-right" style="font-size:1rem; opacity:0.8;"></i>
@@ -553,5 +627,103 @@
       <span><i class="fas fa-hdmi"></i> HD</span>
     </div>
   </div>
+
+  <script>
+    // --- JavaScript untuk mengontrol kamera ---
+    const video = document.getElementById('webcam');
+    const startBtn = document.getElementById('startBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const statusDot = document.getElementById('statusDot');
+    const statusText = document.getElementById('statusText');
+
+    let stream = null;
+
+    // Fungsi untuk update status
+    function updateStatus(isActive) {
+      if (isActive) {
+        statusDot.className = 'dot active';
+        statusText.textContent = 'Online';
+        statusText.style.color = '#4caf50';
+      } else {
+        statusDot.className = 'dot inactive';
+        statusText.textContent = 'Offline';
+        statusText.style.color = '#fff';
+      }
+    }
+
+    // Mulai kamera
+    async function startCamera() {
+      try {
+        // Minta akses kamera dengan kualitas tinggi
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            width: { ideal: 1920 },
+            height: { ideal: 1080 },
+            facingMode: 'user',
+            frameRate: { ideal: 30 }
+          },
+          audio: false
+        });
+
+        video.srcObject = stream;
+        await video.play();
+        updateStatus(true);
+        startBtn.disabled = true;
+        startBtn.style.opacity = '0.5';
+        startBtn.style.cursor = 'default';
+        stopBtn.disabled = false;
+        stopBtn.style.opacity = '1';
+        stopBtn.style.cursor = 'pointer';
+
+        console.log('📷 Kamera berhasil diaktifkan dalam mode HD');
+      } catch (err) {
+        console.error('❌ Gagal mengakses kamera:', err);
+        alert('Tidak dapat mengakses kamera. Pastikan Anda telah mengizinkan akses kamera dan tidak ada aplikasi lain yang menggunakan kamera.');
+        updateStatus(false);
+        startBtn.disabled = false;
+        startBtn.style.opacity = '1';
+        startBtn.style.cursor = 'pointer';
+      }
+    }
+
+    // Hentikan kamera
+    function stopCamera() {
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        stream = null;
+        video.srcObject = null;
+        updateStatus(false);
+        startBtn.disabled = false;
+        startBtn.style.opacity = '1';
+        startBtn.style.cursor = 'pointer';
+        stopBtn.disabled = true;
+        stopBtn.style.opacity = '0.5';
+        stopBtn.style.cursor = 'default';
+        console.log('📷 Kamera dihentikan');
+      }
+    }
+
+    // Event listener untuk tombol
+    startBtn.addEventListener('click', startCamera);
+    stopBtn.addEventListener('click', stopCamera);
+
+    // Set initial state
+    stopBtn.disabled = true;
+    stopBtn.style.opacity = '0.5';
+    stopBtn.style.cursor = 'default';
+    updateStatus(false);
+
+    // Cek apakah browser mendukung getUserMedia
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      alert('Browser Anda tidak mendukung akses kamera. Silakan gunakan browser modern seperti Chrome, Firefox, atau Edge.');
+      startBtn.disabled = true;
+      startBtn.style.opacity = '0.5';
+      startBtn.style.cursor = 'default';
+    }
+
+    // Auto-start kamera saat halaman dimuat (opsional)
+    // Uncomment baris di bawah jika ingin kamera langsung menyala
+    // setTimeout(startCamera, 500);
+  </script>
 </body>
 </html>
