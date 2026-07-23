@@ -988,7 +988,7 @@
   }
 
   // ============================================================
-  // 2. FACEMESH DENGAN DETEKSI EKSPRESI (HANYA MULUT + STIKER KACAMATA)
+  // 2. FACEMESH DENGAN DETEKSI EKSPRESI + KACAMATA PINK BERGAYA
   // ============================================================
   const canvas = document.getElementById('facemeshCanvas');
   const canvasCtx = canvas.getContext('2d');
@@ -1180,7 +1180,6 @@
     mouthStatus.innerHTML = `<i class="fas fa-mouth"></i> ${mouthText}`;
     mouthStatus.style.color = isMouthOpen ? '#ff9f43' : '#888';
 
-    // Kembalikan data untuk digunakan di fungsi gambar
     return {
       expression: smoothedExpression,
       isBlinking,
@@ -1196,17 +1195,21 @@
     };
   }
 
-  // ===== FUNGSI GAMBAR STIKER KACAMATA =====
-  function drawGlasses(ctx, landmarks, width, height) {
-    // Titik mata kiri dan kanan
+  // ===== FUNGSI GAMBAR KACAMATA PINK DENGAN KUMIS =====
+  function drawCuteGlasses(ctx, landmarks, width, height) {
+    // Titik mata
     const leftEye = landmarks[33];
     const rightEye = landmarks[263];
     const leftEyeInner = landmarks[133];
     const rightEyeInner = landmarks[362];
     const noseTip = landmarks[1];
     const noseBridge = landmarks[168];
+    const mouthLeft = landmarks[61];
+    const mouthRight = landmarks[291];
+    const mouthTop = landmarks[13];
+    const mouthBottom = landmarks[14];
 
-    // Hitung posisi dan ukuran kacamata
+    // Hitung posisi dan ukuran
     const eyeCenterX = (leftEye.x + rightEye.x) / 2 * width;
     const eyeCenterY = (leftEye.y + rightEye.y) / 2 * height;
     const eyeDistance = Math.sqrt(
@@ -1214,123 +1217,245 @@
       Math.pow((rightEye.y - leftEye.y) * height, 2)
     );
     
-    const lensRadius = eyeDistance * 0.45;
-    const bridgeWidth = eyeDistance * 0.25;
+    const lensRadius = eyeDistance * 0.48;
+    const bridgeWidth = eyeDistance * 0.2;
 
-    // Warna kacamata
-    const glassColor = 'rgba(100, 180, 255, 0.25)';
-    const frameColor = '#2c3e50';
-    const frameGlow = 'rgba(100, 180, 255, 0.15)';
+    // Warna pink cerah
+    const pinkColor = '#ff69b4';
+    const pinkLight = 'rgba(255, 105, 180, 0.25)';
+    const pinkDark = '#e75480';
+    const pinkGlow = 'rgba(255, 105, 180, 0.2)';
 
     // === LENSA KIRI ===
     const leftX = leftEye.x * width;
     const leftY = leftEye.y * height;
 
-    // Shadow/glow lensa
-    ctx.shadowColor = 'rgba(100, 180, 255, 0.2)';
-    ctx.shadowBlur = 20;
+    // Shadow/glow
+    ctx.shadowColor = pinkGlow;
+    ctx.shadowBlur = 25;
     
-    // Lensa kiri
+    // Lensa kiri - bingkai tebal pink
     ctx.beginPath();
-    ctx.ellipse(leftX, leftY, lensRadius, lensRadius * 1.05, 0, 0, 2 * Math.PI);
-    ctx.fillStyle = glassColor;
+    ctx.ellipse(leftX, leftY, lensRadius, lensRadius * 1.08, 0, 0, 2 * Math.PI);
+    ctx.fillStyle = pinkLight;
     ctx.fill();
-    ctx.strokeStyle = frameColor;
-    ctx.lineWidth = 2.5;
+    ctx.strokeStyle = pinkColor;
+    ctx.lineWidth = 4;
     ctx.stroke();
     
-    // Glow effect
-    ctx.shadowBlur = 30;
-    ctx.shadowColor = 'rgba(100, 180, 255, 0.1)';
+    // Lensa dalam dengan efek gradient
+    const gradient1 = ctx.createRadialGradient(leftX - lensRadius*0.2, leftY - lensRadius*0.2, 0, leftX, leftY, lensRadius);
+    gradient1.addColorStop(0, 'rgba(255, 182, 193, 0.15)');
+    gradient1.addColorStop(1, 'rgba(255, 105, 180, 0.05)');
     ctx.beginPath();
     ctx.ellipse(leftX, leftY, lensRadius * 0.85, lensRadius * 0.9, 0, 0, 2 * Math.PI);
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+    ctx.fillStyle = gradient1;
     ctx.fill();
 
     // === LENSA KANAN ===
     const rightX = rightEye.x * width;
     const rightY = rightEye.y * height;
 
-    ctx.shadowColor = 'rgba(100, 180, 255, 0.2)';
-    ctx.shadowBlur = 20;
+    ctx.shadowColor = pinkGlow;
+    ctx.shadowBlur = 25;
     
     ctx.beginPath();
-    ctx.ellipse(rightX, rightY, lensRadius, lensRadius * 1.05, 0, 0, 2 * Math.PI);
-    ctx.fillStyle = glassColor;
+    ctx.ellipse(rightX, rightY, lensRadius, lensRadius * 1.08, 0, 0, 2 * Math.PI);
+    ctx.fillStyle = pinkLight;
     ctx.fill();
-    ctx.strokeStyle = frameColor;
-    ctx.lineWidth = 2.5;
+    ctx.strokeStyle = pinkColor;
+    ctx.lineWidth = 4;
     ctx.stroke();
 
-    // Glow effect
-    ctx.shadowBlur = 30;
-    ctx.shadowColor = 'rgba(100, 180, 255, 0.1)';
+    const gradient2 = ctx.createRadialGradient(rightX - lensRadius*0.2, rightY - lensRadius*0.2, 0, rightX, rightY, lensRadius);
+    gradient2.addColorStop(0, 'rgba(255, 182, 193, 0.15)');
+    gradient2.addColorStop(1, 'rgba(255, 105, 180, 0.05)');
     ctx.beginPath();
     ctx.ellipse(rightX, rightY, lensRadius * 0.85, lensRadius * 0.9, 0, 0, 2 * Math.PI);
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+    ctx.fillStyle = gradient2;
     ctx.fill();
 
     // === JEMBATAN ===
     ctx.shadowBlur = 0;
     ctx.beginPath();
     const bridgeY = (leftY + rightY) / 2;
-    ctx.moveTo(leftX + lensRadius * 0.8, leftY - lensRadius * 0.1);
+    ctx.moveTo(leftX + lensRadius * 0.75, leftY - lensRadius * 0.05);
     ctx.quadraticCurveTo(
       (leftX + rightX) / 2, 
-      bridgeY - lensRadius * 0.3, 
-      rightX - lensRadius * 0.8, 
-      rightY - lensRadius * 0.1
+      bridgeY - lensRadius * 0.35, 
+      rightX - lensRadius * 0.75, 
+      rightY - lensRadius * 0.05
     );
-    ctx.strokeStyle = frameColor;
-    ctx.lineWidth = 3;
+    ctx.strokeStyle = pinkColor;
+    ctx.lineWidth = 4;
+    ctx.stroke();
+
+    // Jembatan kedua (detail)
+    ctx.beginPath();
+    ctx.moveTo(leftX + lensRadius * 0.7, leftY + lensRadius * 0.1);
+    ctx.quadraticCurveTo(
+      (leftX + rightX) / 2, 
+      bridgeY + lensRadius * 0.1, 
+      rightX - lensRadius * 0.7, 
+      rightY + lensRadius * 0.1
+    );
+    ctx.strokeStyle = pinkDark;
+    ctx.lineWidth = 2;
     ctx.stroke();
 
     // === TANGKAI KIRI ===
     ctx.beginPath();
-    ctx.moveTo(leftX - lensRadius * 0.85, leftY);
-    ctx.lineTo(leftX - lensRadius * 1.6, leftY - lensRadius * 0.2);
-    ctx.strokeStyle = frameColor;
-    ctx.lineWidth = 3;
+    ctx.moveTo(leftX - lensRadius * 0.8, leftY);
+    ctx.lineTo(leftX - lensRadius * 1.8, leftY - lensRadius * 0.3);
+    ctx.strokeStyle = pinkColor;
+    ctx.lineWidth = 3.5;
     ctx.stroke();
 
     // === TANGKAI KANAN ===
     ctx.beginPath();
-    ctx.moveTo(rightX + lensRadius * 0.85, rightY);
-    ctx.lineTo(rightX + lensRadius * 1.6, rightY - lensRadius * 0.2);
-    ctx.strokeStyle = frameColor;
-    ctx.lineWidth = 3;
+    ctx.moveTo(rightX + lensRadius * 0.8, rightY);
+    ctx.lineTo(rightX + lensRadius * 1.8, rightY - lensRadius * 0.3);
+    ctx.strokeStyle = pinkColor;
+    ctx.lineWidth = 3.5;
     ctx.stroke();
 
-    // Reset shadow
+    // === HIASAN BUNGA KECIL DI SUDUT ===
+    function drawFlower(cx, cy, size, color) {
+      for (let i = 0; i < 5; i++) {
+        const angle = (i / 5) * Math.PI * 2 - Math.PI / 2;
+        const px = cx + Math.cos(angle) * size;
+        const py = cy + Math.sin(angle) * size;
+        ctx.beginPath();
+        ctx.arc(px, py, size * 0.5, 0, 2 * Math.PI);
+        ctx.fillStyle = color;
+        ctx.fill();
+      }
+      ctx.beginPath();
+      ctx.arc(cx, cy, size * 0.25, 0, 2 * Math.PI);
+      ctx.fillStyle = '#fff';
+      ctx.fill();
+    }
+
+    // Bunga di ujung tangkai kiri
+    drawFlower(leftX - lensRadius * 1.8, leftY - lensRadius * 0.3, lensRadius * 0.12, '#ff85a2');
+    // Bunga di ujung tangkai kanan
+    drawFlower(rightX + lensRadius * 1.8, rightY - lensRadius * 0.3, lensRadius * 0.12, '#ff85a2');
+
+    // === KUMIS ===
+    // Kumis kiri
     ctx.shadowBlur = 0;
-    ctx.shadowColor = 'transparent';
+    ctx.beginPath();
+    ctx.moveTo(mouthLeft.x * width - 5, (mouthLeft.y * height + mouthTop.y * height) / 2);
+    ctx.quadraticCurveTo(
+      mouthLeft.x * width - lensRadius * 0.8, 
+      mouthTop.y * height - lensRadius * 0.4,
+      mouthLeft.x * width - lensRadius * 1.2, 
+      (mouthLeft.y * height + mouthTop.y * height) / 2 + lensRadius * 0.2
+    );
+    ctx.strokeStyle = '#2c1810';
+    ctx.lineWidth = 3.5;
+    ctx.stroke();
+
+    // Kumis kiri bawah
+    ctx.beginPath();
+    ctx.moveTo(mouthLeft.x * width - 5, (mouthLeft.y * height + mouthBottom.y * height) / 2);
+    ctx.quadraticCurveTo(
+      mouthLeft.x * width - lensRadius * 0.8, 
+      mouthBottom.y * height + lensRadius * 0.4,
+      mouthLeft.x * width - lensRadius * 1.2, 
+      (mouthLeft.y * height + mouthBottom.y * height) / 2 - lensRadius * 0.2
+    );
+    ctx.strokeStyle = '#2c1810';
+    ctx.lineWidth = 3.5;
+    ctx.stroke();
+
+    // Kumis kanan
+    ctx.beginPath();
+    ctx.moveTo(mouthRight.x * width + 5, (mouthRight.y * height + mouthTop.y * height) / 2);
+    ctx.quadraticCurveTo(
+      mouthRight.x * width + lensRadius * 0.8, 
+      mouthTop.y * height - lensRadius * 0.4,
+      mouthRight.x * width + lensRadius * 1.2, 
+      (mouthRight.y * height + mouthTop.y * height) / 2 + lensRadius * 0.2
+    );
+    ctx.strokeStyle = '#2c1810';
+    ctx.lineWidth = 3.5;
+    ctx.stroke();
+
+    // Kumis kanan bawah
+    ctx.beginPath();
+    ctx.moveTo(mouthRight.x * width + 5, (mouthRight.y * height + mouthBottom.y * height) / 2);
+    ctx.quadraticCurveTo(
+      mouthRight.x * width + lensRadius * 0.8, 
+      mouthBottom.y * height + lensRadius * 0.4,
+      mouthRight.x * width + lensRadius * 1.2, 
+      (mouthRight.y * height + mouthBottom.y * height) / 2 - lensRadius * 0.2
+    );
+    ctx.strokeStyle = '#2c1810';
+    ctx.lineWidth = 3.5;
+    ctx.stroke();
+
+    // Titik ujung kumis (bulatan kecil)
+    ctx.fillStyle = '#2c1810';
+    ctx.beginPath();
+    ctx.arc(mouthLeft.x * width - lensRadius * 1.2, (mouthLeft.y * height + mouthTop.y * height) / 2 + lensRadius * 0.2, 3, 0, 2 * Math.PI);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(mouthLeft.x * width - lensRadius * 1.2, (mouthLeft.y * height + mouthBottom.y * height) / 2 - lensRadius * 0.2, 3, 0, 2 * Math.PI);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(mouthRight.x * width + lensRadius * 1.2, (mouthRight.y * height + mouthTop.y * height) / 2 + lensRadius * 0.2, 3, 0, 2 * Math.PI);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(mouthRight.x * width + lensRadius * 1.2, (mouthRight.y * height + mouthBottom.y * height) / 2 - lensRadius * 0.2, 3, 0, 2 * Math.PI);
+    ctx.fill();
 
     // === REFLEKSI CAHAYA PADA LENSA ===
+    ctx.shadowBlur = 0;
     // Refleksi kiri
     ctx.beginPath();
     ctx.ellipse(
-      leftX - lensRadius * 0.25, 
-      leftY - lensRadius * 0.3, 
+      leftX - lensRadius * 0.3, 
+      leftY - lensRadius * 0.35, 
       lensRadius * 0.2, 
-      lensRadius * 0.15, 
+      lensRadius * 0.12, 
       -0.5, 
       0, 2 * Math.PI
     );
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
     ctx.fill();
 
     // Refleksi kanan
     ctx.beginPath();
     ctx.ellipse(
-      rightX - lensRadius * 0.25, 
-      rightY - lensRadius * 0.3, 
+      rightX - lensRadius * 0.3, 
+      rightY - lensRadius * 0.35, 
       lensRadius * 0.2, 
-      lensRadius * 0.15, 
+      lensRadius * 0.12, 
       -0.5, 
       0, 2 * Math.PI
     );
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
     ctx.fill();
+
+    // Reset shadow
+    ctx.shadowBlur = 0;
+    ctx.shadowColor = 'transparent';
+
+    // === HATI KECIL DI SUDUT KACAMATA ===
+    function drawHeart(cx, cy, size) {
+      ctx.beginPath();
+      ctx.moveTo(cx, cy + size * 0.3);
+      ctx.bezierCurveTo(cx - size * 0.5, cy - size * 0.3, cx - size * 0.3, cy - size * 0.7, cx, cy - size * 0.4);
+      ctx.bezierCurveTo(cx + size * 0.3, cy - size * 0.7, cx + size * 0.5, cy - size * 0.3, cx, cy + size * 0.3);
+      ctx.fillStyle = '#ff6b8a';
+      ctx.fill();
+    }
+
+    // Hati di atas lensa kiri
+    drawHeart(leftX - lensRadius * 0.5, leftY - lensRadius * 1.3, lensRadius * 0.15);
+    // Hati di atas lensa kanan
+    drawHeart(rightX + lensRadius * 0.5, rightY - lensRadius * 1.3, lensRadius * 0.15);
   }
 
   function startFaceMesh() {
@@ -1395,6 +1520,7 @@
       canvas.height = rect.height;
     }
 
+    // Bersihkan canvas (transparan)
     canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
     
     if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
@@ -1403,120 +1529,9 @@
       // ===== DETEKSI EKSPRESI =====
       const exprData = detectExpression(landmarks);
       
-      // ===== GAMBAR STIKER KACAMATA JIKA MATA TERTUTUP =====
-      if (exprData.isBlinking) {
-        drawGlasses(canvasCtx, landmarks, canvas.width, canvas.height);
-      }
-      
-      // ===== GAMBAR TITIK DAN GARIS HANYA DI AREA MULUT =====
-      // Indeks landmark area mulut (468 titik total, area mulut sekitar 0-20 dan 61-291)
-      const mouthIndices = [
-        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-        61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80,
-        81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100,
-        101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117,
-        118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133,
-        134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149,
-        150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165,
-        166, 167, 168, 169, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181,
-        182, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192, 193, 194, 195, 196, 197,
-        198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213,
-        214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229,
-        230, 231, 232, 233, 234, 235, 236, 237, 238, 239, 240, 241, 242, 243, 244, 245,
-        246, 247, 248, 249, 250, 251, 252, 253, 254, 255, 256, 257, 258, 259, 260, 261,
-        262, 263, 264, 265, 266, 267, 268, 269, 270, 271, 272, 273, 274, 275, 276, 277,
-        278, 279, 280, 281, 282, 283, 284, 285, 286, 287, 288, 289, 290, 291, 292, 293,
-        294, 295, 296, 297, 298, 299, 300, 301, 302, 303, 304, 305, 306, 307, 308, 309,
-        310, 311, 312, 313, 314, 315, 316, 317, 318, 319, 320, 321, 322, 323, 324, 325,
-        326, 327, 328, 329, 330, 331, 332, 333, 334, 335, 336, 337, 338, 339, 340, 341,
-        342, 343, 344, 345, 346, 347, 348, 349, 350, 351, 352, 353, 354, 355, 356, 357,
-        358, 359, 360, 361, 362, 363, 364, 365, 366, 367, 368, 369, 370, 371, 372, 373,
-        374, 375, 376, 377, 378, 379, 380, 381, 382, 383, 384, 385, 386, 387, 388, 389,
-        390, 391, 392, 393, 394, 395, 396, 397, 398, 399, 400, 401, 402, 403, 404, 405,
-        406, 407, 408, 409, 410, 411, 412, 413, 414, 415, 416, 417, 418, 419, 420, 421,
-        422, 423, 424, 425, 426, 427, 428, 429, 430, 431, 432, 433, 434, 435, 436, 437,
-        438, 439, 440, 441, 442, 443, 444, 445, 446, 447, 448, 449, 450, 451, 452, 453,
-        454, 455, 456, 457, 458, 459, 460, 461, 462, 463, 464, 465, 466, 467
-      ];
-
-      // Filter landmark hanya di area mulut
-      const mouthLandmarks = [];
-      for (const idx of mouthIndices) {
-        if (idx < landmarks.length) {
-          mouthLandmarks.push(landmarks[idx]);
-        }
-      }
-
-      // Gambar titik-titik di area mulut (warna berbeda)
-      for (const landmark of mouthLandmarks) {
-        const x = landmark.x * canvas.width;
-        const y = landmark.y * canvas.height;
-        
-        // Titik dengan warna pink cerah
-        const gradient = canvasCtx.createRadialGradient(x, y, 0, x, y, 5);
-        gradient.addColorStop(0, 'rgba(255, 107, 107, 1)');
-        gradient.addColorStop(0.5, 'rgba(255, 107, 107, 0.7)');
-        gradient.addColorStop(1, 'rgba(255, 107, 107, 0)');
-        
-        canvasCtx.beginPath();
-        canvasCtx.arc(x, y, 5, 0, 2 * Math.PI);
-        canvasCtx.fillStyle = gradient;
-        canvasCtx.fill();
-        
-        // Titik pusat
-        canvasCtx.beginPath();
-        canvasCtx.arc(x, y, 2, 0, 2 * Math.PI);
-        canvasCtx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-        canvasCtx.fill();
-      }
-
-      // Gambar koneksi garis di area mulut
-      const mouthConnections = [
-        [61, 146], [146, 91], [91, 181], [181, 84], [84, 17], [17, 314], [314, 405], [405, 321], [321, 375],
-        [375, 291], [291, 308], [308, 324], [324, 318], [318, 402], [402, 317], [317, 14], [14, 87], [87, 178],
-        [178, 88], [88, 95], [95, 78], [78, 61],
-        [61, 185], [185, 40], [40, 39], [39, 37], [37, 0], [0, 267], [267, 269], [269, 270], [270, 409],
-        [409, 291], [291, 308], [308, 324], [324, 318], [318, 402], [402, 317], [317, 14], [14, 87], [87, 178],
-        [178, 88], [88, 95], [95, 78], [78, 61]
-      ];
-
-      for (const [i, j] of mouthConnections) {
-        if (i < landmarks.length && j < landmarks.length) {
-          const p1 = landmarks[i];
-          const p2 = landmarks[j];
-          canvasCtx.beginPath();
-          canvasCtx.moveTo(p1.x * canvas.width, p1.y * canvas.height);
-          canvasCtx.lineTo(p2.x * canvas.width, p2.y * canvas.height);
-          canvasCtx.strokeStyle = 'rgba(255, 107, 107, 0.3)';
-          canvasCtx.lineWidth = 1.5;
-          canvasCtx.stroke();
-        }
-      }
-
-      // Gambar bounding box area mulut
-      let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-      for (const landmark of mouthLandmarks) {
-        const x = landmark.x * canvas.width;
-        const y = landmark.y * canvas.height;
-        if (x < minX) minX = x;
-        if (x > maxX) maxX = x;
-        if (y < minY) minY = y;
-        if (y > maxY) maxY = y;
-      }
-      
-      if (minX !== Infinity) {
-        const padding = 15;
-        canvasCtx.strokeStyle = 'rgba(255, 107, 107, 0.15)';
-        canvasCtx.lineWidth = 1.5;
-        canvasCtx.setLineDash([4, 4]);
-        canvasCtx.strokeRect(
-          minX - padding, 
-          minY - padding, 
-          maxX - minX + padding * 2, 
-          maxY - minY + padding * 2
-        );
-        canvasCtx.setLineDash([]);
-      }
+      // ===== GAMBAR KACAMATA PINK DENGAN KUMIS =====
+      // Kacamata selalu digambar (tidak hanya saat berkedip)
+      drawCuteGlasses(canvasCtx, landmarks, canvas.width, canvas.height);
     }
   }
 </script>
