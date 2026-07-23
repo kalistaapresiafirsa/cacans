@@ -217,6 +217,78 @@
       font-size: 0.6rem;
     }
 
+    /* ===== EKSPRESI BADGE ===== */
+    .expression-badge {
+      position: absolute;
+      top: 55px;
+      left: 12px;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(8px);
+      color: #fff;
+      padding: 8px 16px;
+      border-radius: 16px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      z-index: 3;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 4px;
+      pointer-events: none;
+      min-width: 120px;
+      transition: all 0.3s ease;
+    }
+
+    .expression-badge .expr-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.7rem;
+      color: #aaa;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .expression-badge .expr-value {
+      font-size: 1.1rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .expression-badge .expr-value i {
+      font-size: 1.2rem;
+    }
+
+    .expr-happy i { color: #ffd93d; }
+    .expr-sad i { color: #6c9ebf; }
+    .expr-angry i { color: #ff6b6b; }
+    .expr-surprised i { color: #ff9f43; }
+    .expr-neutral i { color: #a8a8a8; }
+    .expr-blink i { color: #4fc3f7; }
+
+    /* Detail ekspresi tambahan */
+    .expr-details {
+      display: flex;
+      gap: 12px;
+      font-size: 0.6rem;
+      color: #888;
+      margin-top: 2px;
+      flex-wrap: wrap;
+    }
+
+    .expr-details span {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .expr-details .active {
+      color: #4fc3f7;
+    }
+
     @keyframes pulse-dot {
       0%,
       100% {
@@ -621,6 +693,18 @@
         padding: 2px 10px;
         font-size: 0.5rem;
       }
+
+      .expression-badge {
+        top: 50px;
+        left: 10px;
+        padding: 6px 12px;
+        font-size: 0.7rem;
+        min-width: 100px;
+      }
+
+      .expression-badge .expr-value {
+        font-size: 0.95rem;
+      }
     }
 
     @media (max-width: 480px) {
@@ -668,6 +752,23 @@
         padding: 2px 8px;
         font-size: 0.45rem;
       }
+
+      .expression-badge {
+        top: 45px;
+        left: 8px;
+        padding: 4px 10px;
+        font-size: 0.6rem;
+        min-width: 80px;
+      }
+
+      .expression-badge .expr-value {
+        font-size: 0.8rem;
+      }
+
+      .expr-details {
+        font-size: 0.5rem;
+        gap: 6px;
+      }
     }
   </style>
 </head>
@@ -699,6 +800,20 @@
         
         <div class="facemesh-badge">
           <i class="fas fa-eye"></i> FaceMesh
+        </div>
+
+        <!-- Expression Badge -->
+        <div class="expression-badge" id="expressionBadge">
+          <div class="expr-label">
+            <i class="fas fa-smile"></i> EKSPRESI
+          </div>
+          <div class="expr-value expr-neutral" id="exprValue">
+            <i class="fas fa-meh"></i> Netral
+          </div>
+          <div class="expr-details" id="exprDetails">
+            <span id="blinkStatus"><i class="fas fa-eye"></i> Mata: Terbuka</span>
+            <span id="mouthStatus"><i class="fas fa-mouth"></i> Mulut: Tertutup</span>
+          </div>
         </div>
       </div>
 
@@ -792,7 +907,7 @@
 <!-- ===== JAVASCRIPT ===== -->
 <script>
   // ============================================================
-  // 1. KONTROL KAMERA (tanpa perubahan)
+  // 1. KONTROL KAMERA
   // ============================================================
   const video = document.getElementById('webcam');
   const startBtn = document.getElementById('startBtn');
@@ -873,12 +988,22 @@
   }
 
   // ============================================================
-  // 2. FACEMESH DENGAN MEDIAPIPE
+  // 2. FACEMESH DENGAN DETEKSI EKSPRESI
   // ============================================================
   const canvas = document.getElementById('facemeshCanvas');
   const canvasCtx = canvas.getContext('2d');
   let faceMesh = null;
   let camera = null;
+
+  // Elemen ekspresi
+  const exprValue = document.getElementById('exprValue');
+  const exprDetails = document.getElementById('exprDetails');
+  const blinkStatus = document.getElementById('blinkStatus');
+  const mouthStatus = document.getElementById('mouthStatus');
+
+  // Variabel untuk smoothing
+  let expressionHistory = [];
+  const HISTORY_SIZE = 5;
 
   function resizeCanvas() {
     const container = document.getElementById('facemeshContainer');
@@ -887,8 +1012,199 @@
     canvas.height = rect.height;
   }
 
-  // Resize canvas saat window berubah
   window.addEventListener('resize', resizeCanvas);
+
+  // ===== FUNGSI DETEKSI EKSPRESI =====
+  function detectExpression(landmarks) {
+    // Indeks landmark penting
+    // Mata kiri: 33, 7, 163, 144, 145, 153, 154, 155, 133, 173, 157, 158, 159, 160, 161, 246
+    // Mata kanan: 362, 398, 384, 385, 386, 387, 388, 466, 263, 249, 390, 373, 374, 380, 381, 382
+    // Bibir atas: 61, 146, 91, 181, 84, 17, 314, 405, 321, 375, 291, 308, 324, 318, 402, 317, 14, 87, 178, 88, 95
+    // Bibir bawah: 78, 95, 88, 178, 87, 14, 317, 402, 318, 324, 308, 291, 375, 321, 405, 314, 17, 84, 181, 91, 146, 61
+    // Alis kiri: 46, 53, 52, 65, 55
+    // Alis kanan: 276, 283, 282, 295, 285
+
+    // Mata kiri - gunakan titik 33 (kiri atas) dan 133 (kiri bawah) untuk mengukur bukaan mata
+    const leftEyeTop = landmarks[159]; // kelopak atas kiri
+    const leftEyeBottom = landmarks[145]; // kelopak bawah kiri
+    const leftEyeLeft = landmarks[33];
+    const leftEyeRight = landmarks[133];
+
+    // Mata kanan
+    const rightEyeTop = landmarks[386];
+    const rightEyeBottom = landmarks[374];
+    const rightEyeLeft = landmarks[362];
+    const rightEyeRight = landmarks[263];
+
+    // Mulut - gunakan titik atas dan bawah
+    const mouthTop = landmarks[13];
+    const mouthBottom = landmarks[14];
+    const mouthLeft = landmarks[61];
+    const mouthRight = landmarks[291];
+
+    // Alis
+    const leftEyebrow = landmarks[46];
+    const rightEyebrow = landmarks[276];
+
+    // Hitung rasio bukaan mata (EAR - Eye Aspect Ratio)
+    function calculateEAR(eyeTop, eyeBottom, eyeLeft, eyeRight) {
+      const vertical = Math.sqrt(
+        Math.pow(eyeTop.x - eyeBottom.x, 2) + 
+        Math.pow(eyeTop.y - eyeBottom.y, 2)
+      );
+      const horizontal = Math.sqrt(
+        Math.pow(eyeLeft.x - eyeRight.x, 2) + 
+        Math.pow(eyeLeft.y - eyeRight.y, 2)
+      );
+      return vertical / horizontal;
+    }
+
+    const leftEAR = calculateEAR(leftEyeTop, leftEyeBottom, leftEyeLeft, leftEyeRight);
+    const rightEAR = calculateEAR(rightEyeTop, rightEyeBottom, rightEyeLeft, rightEyeRight);
+    const avgEAR = (leftEAR + rightEAR) / 2;
+
+    // Deteksi kedipan (blink)
+    const BLINK_THRESHOLD = 0.18;
+    const isBlinking = avgEAR < BLINK_THRESHOLD;
+
+    // Deteksi mulut terbuka (rasio tinggi/lebar)
+    const mouthHeight = Math.sqrt(
+      Math.pow(mouthTop.x - mouthBottom.x, 2) + 
+      Math.pow(mouthTop.y - mouthBottom.y, 2)
+    );
+    const mouthWidth = Math.sqrt(
+      Math.pow(mouthLeft.x - mouthRight.x, 2) + 
+      Math.pow(mouthLeft.y - mouthRight.y, 2)
+    );
+    const mouthRatio = mouthHeight / mouthWidth;
+    const isMouthOpen = mouthRatio > 0.3;
+
+    // Deteksi senyum (ukur sudut bibir)
+    const mouthLeftCorner = landmarks[61];
+    const mouthRightCorner = landmarks[291];
+    const mouthCenter = landmarks[13];
+    
+    // Hitung sudut antara titik tengah bibir atas dan sudut bibir
+    const leftAngle = Math.atan2(
+      mouthLeftCorner.y - mouthCenter.y,
+      mouthLeftCorner.x - mouthCenter.x
+    );
+    const rightAngle = Math.atan2(
+      mouthRightCorner.y - mouthCenter.y,
+      mouthRightCorner.x - mouthCenter.x
+    );
+    
+    // Semakin besar sudut, semakin lebar senyum
+    const smileScore = Math.abs(leftAngle) + Math.abs(rightAngle);
+    const isSmiling = smileScore > 0.7 && isMouthOpen === false;
+
+    // Deteksi cemberut (mulut miring ke bawah)
+    const isFrowning = mouthTop.y > mouthBottom.y * 0.3 && !isSmiling;
+
+    // Deteksi terkejut (mata terbuka lebar + mulut terbuka)
+    const isSurprised = avgEAR > 0.35 && isMouthOpen;
+
+    // Deteksi marah (alis turun)
+    const eyebrowDistance = Math.abs(leftEyebrow.y - rightEyebrow.y);
+    const isAngry = eyebrowDistance < 0.03 && !isSmiling && !isSurprised;
+
+    // Deteksi netral
+    const isNeutral = !isBlinking && !isSmiling && !isFrowning && !isSurprised && !isAngry;
+
+    // Tentukan ekspresi dominan
+    let expression = 'neutral';
+    let expressionIcon = 'fa-meh';
+    let expressionClass = 'expr-neutral';
+    let expressionName = 'Netral';
+
+    if (isBlinking) {
+      expression = 'blink';
+      expressionIcon = 'fa-eye';
+      expressionClass = 'expr-blink';
+      expressionName = 'Berkedip 👁️';
+    } else if (isSurprised) {
+      expression = 'surprised';
+      expressionIcon = 'fa-surprise';
+      expressionClass = 'expr-surprised';
+      expressionName = 'Terkejut 😮';
+    } else if (isSmiling) {
+      expression = 'happy';
+      expressionIcon = 'fa-smile';
+      expressionClass = 'expr-happy';
+      expressionName = 'Tersenyum 😊';
+    } else if (isFrowning) {
+      expression = 'sad';
+      expressionIcon = 'fa-frown';
+      expressionClass = 'expr-sad';
+      expressionName = 'Cemberut ☹️';
+    } else if (isAngry) {
+      expression = 'angry';
+      expressionIcon = 'fa-angry';
+      expressionClass = 'expr-angry';
+      expressionName = 'Marah 😠';
+    } else {
+      expression = 'neutral';
+      expressionIcon = 'fa-meh';
+      expressionClass = 'expr-neutral';
+      expressionName = 'Netral 😐';
+    }
+
+    // Smoothing dengan history
+    expressionHistory.push(expression);
+    if (expressionHistory.length > HISTORY_SIZE) {
+      expressionHistory.shift();
+    }
+
+    // Ambil ekspresi yang paling sering muncul
+    const freq = {};
+    for (const e of expressionHistory) {
+      freq[e] = (freq[e] || 0) + 1;
+    }
+    let maxFreq = 0;
+    let smoothedExpression = 'neutral';
+    for (const [e, count] of Object.entries(freq)) {
+      if (count > maxFreq) {
+        maxFreq = count;
+        smoothedExpression = e;
+      }
+    }
+
+    // Update tampilan ekspresi
+    const exprMap = {
+      'blink': { icon: 'fa-eye', class: 'expr-blink', name: 'Berkedip 👁️' },
+      'surprised': { icon: 'fa-surprise', class: 'expr-surprised', name: 'Terkejut 😮' },
+      'happy': { icon: 'fa-smile', class: 'expr-happy', name: 'Tersenyum 😊' },
+      'sad': { icon: 'fa-frown', class: 'expr-sad', name: 'Cemberut ☹️' },
+      'angry': { icon: 'fa-angry', class: 'expr-angry', name: 'Marah 😠' },
+      'neutral': { icon: 'fa-meh', class: 'expr-neutral', name: 'Netral 😐' }
+    };
+
+    const exprInfo = exprMap[smoothedExpression] || exprMap['neutral'];
+    exprValue.className = `expr-value ${exprInfo.class}`;
+    exprValue.innerHTML = `<i class="fas ${exprInfo.icon}"></i> ${exprInfo.name}`;
+
+    // Update detail
+    const blinkText = isBlinking ? 'Mata: Tertutup' : 'Mata: Terbuka';
+    const mouthText = isMouthOpen ? 'Mulut: Terbuka' : 'Mulut: Tertutup';
+    blinkStatus.innerHTML = `<i class="fas fa-eye"></i> ${blinkText}`;
+    blinkStatus.style.color = isBlinking ? '#4fc3f7' : '#888';
+    mouthStatus.innerHTML = `<i class="fas fa-mouth"></i> ${mouthText}`;
+    mouthStatus.style.color = isMouthOpen ? '#ff9f43' : '#888';
+
+    // Return untuk debugging
+    return {
+      expression: smoothedExpression,
+      isBlinking,
+      isMouthOpen,
+      isSmiling,
+      isFrowning,
+      isSurprised,
+      isAngry,
+      avgEAR,
+      mouthRatio,
+      smileScore
+    };
+  }
 
   function startFaceMesh() {
     if (facemeshRunning) return;
@@ -910,7 +1226,6 @@
 
     faceMesh.onResults(onFaceMeshResults);
 
-    // Gunakan video element sebagai input untuk FaceMesh
     camera = new Camera(video, {
       onFrame: async () => {
         try {
@@ -941,13 +1256,11 @@
       faceMesh = null;
     }
     facemeshRunning = false;
-    // Bersihkan canvas
     canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
     console.log('⏹️ FaceMesh stopped');
   }
 
   function onFaceMeshResults(results) {
-    // Resize canvas jika ukuran berubah
     const container = document.getElementById('facemeshContainer');
     const rect = container.getBoundingClientRect();
     if (canvas.width !== rect.width || canvas.height !== rect.height) {
@@ -958,15 +1271,17 @@
     canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
     
     if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
-      // Gambar landmark wajah dengan gaya yang lebih indah
       const landmarks = results.multiFaceLandmarks[0];
       
+      // ===== DETEKSI EKSPRESI =====
+      const exprData = detectExpression(landmarks);
+      
+      // ===== GAMBAR LANDMARK =====
       // Gambar titik-titik landmark
       for (const landmark of landmarks) {
         const x = landmark.x * canvas.width;
         const y = landmark.y * canvas.height;
         
-        // Titik dengan efek glow
         const gradient = canvasCtx.createRadialGradient(x, y, 0, x, y, 4);
         gradient.addColorStop(0, 'rgba(255, 107, 107, 1)');
         gradient.addColorStop(0.5, 'rgba(255, 107, 107, 0.8)');
@@ -977,60 +1292,28 @@
         canvasCtx.fillStyle = gradient;
         canvasCtx.fill();
         
-        // Titik pusat
         canvasCtx.beginPath();
         canvasCtx.arc(x, y, 1.5, 0, 2 * Math.PI);
         canvasCtx.fillStyle = 'rgba(255, 255, 255, 0.9)';
         canvasCtx.fill();
       }
       
-      // Gambar koneksi (mesh) dengan garis tipis
-      const connections = [
-        // Lingkaran mata kiri
-        [33, 7, 163, 144, 145, 153, 154, 155, 133, 173, 157, 158, 159, 160, 161, 246],
-        // Lingkaran mata kanan
-        [362, 398, 384, 385, 386, 387, 388, 466, 263, 249, 390, 373, 374, 380, 381, 382],
-        // Alis kiri
-        [46, 53, 52, 65, 55],
-        // Alis kanan
-        [276, 283, 282, 295, 285],
-        // Bibir atas
-        [61, 146, 91, 181, 84, 17, 314, 405, 321, 375, 291, 308, 324, 318, 402, 317, 14, 87, 178, 88, 95],
-        // Bibir bawah
-        [78, 95, 88, 178, 87, 14, 317, 402, 318, 324, 308, 291, 375, 321, 405, 314, 17, 84, 181, 91, 146, 61],
-        // Hidung
-        [1, 2, 98, 327, 326, 97, 6, 197, 195, 5, 4, 294, 296, 295, 285, 276, 283, 282, 281, 55, 65, 52, 53, 46, 45, 44, 43, 48, 115, 120, 117, 118, 119]
-      ];
-      
-      // Gambar koneksi dengan warna pink transparan
-      canvasCtx.strokeStyle = 'rgba(255, 107, 107, 0.3)';
-      canvasCtx.lineWidth = 1;
-      
-      // Gambar segitiga wajah (hanya beberapa koneksi utama untuk efek bersih)
+      // Gambar koneksi utama
       const faceConnections = [
-        // Hidung ke mata
         [1, 33], [1, 133], [1, 362], [1, 263],
         [1, 159], [1, 386],
-        // Mata kiri
         [33, 133], [33, 7], [7, 163], [163, 144], [144, 145], [145, 153], [153, 154], [154, 155], [155, 133],
-        // Mata kanan
         [362, 263], [362, 398], [398, 384], [384, 385], [385, 386], [386, 387], [387, 388], [388, 466], [466, 263],
-        // Bibir
         [61, 146], [146, 91], [91, 181], [181, 84], [84, 17], [17, 314], [314, 405], [405, 321], [321, 375],
         [375, 291], [291, 308], [308, 324], [324, 318], [318, 402], [402, 317], [317, 14], [14, 87], [87, 178],
         [178, 88], [88, 95], [95, 78], [78, 61],
-        // Alis kiri
         [46, 53], [53, 52], [52, 65], [65, 55],
-        // Alis kanan
         [276, 283], [283, 282], [282, 295], [295, 285],
-        // Hidung
         [1, 2], [2, 98], [98, 327], [327, 326], [326, 97], [97, 6], [6, 197], [197, 195], [195, 5], [5, 4],
         [4, 294], [294, 296], [296, 295],
-        // Garis rahang
         [55, 285], [285, 276], [276, 283], [283, 282], [282, 281], [281, 65],
         [65, 52], [52, 53], [53, 46], [46, 45], [45, 44], [44, 43], [43, 48], [48, 115],
-        [115, 120], [120, 117], [117, 118], [118, 119], [119, 120],
-        [120, 117], [117, 118], [118, 119], [119, 120]
+        [115, 120], [120, 117], [117, 118], [118, 119], [119, 120]
       ];
       
       for (const [i, j] of faceConnections) {
@@ -1046,7 +1329,7 @@
         }
       }
       
-      // Gambar bounding box wajah (opsional)
+      // Gambar bounding box
       let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
       for (const landmark of landmarks) {
         const x = landmark.x * canvas.width;
@@ -1057,7 +1340,6 @@
         if (y > maxY) maxY = y;
       }
       
-      // Border kotak dengan efek glow
       const padding = 10;
       canvasCtx.strokeStyle = 'rgba(255, 107, 107, 0.15)';
       canvasCtx.lineWidth = 2;
