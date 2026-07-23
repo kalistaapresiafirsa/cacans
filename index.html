@@ -10,6 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
   <style>
+    /* ===== RESET & BASE ===== */
     * {
       margin: 0;
       padding: 0;
@@ -26,9 +27,9 @@
       padding: 1.5rem;
     }
 
-    /* Kartu utama */
+    /* ===== KARTU UTAMA ===== */
     .card {
-      max-width: 860px;
+      max-width: 1100px;
       width: 100%;
       background: rgba(255, 248, 242, 0.7);
       backdrop-filter: blur(14px);
@@ -42,47 +43,83 @@
       text-align: center;
     }
 
-    /* --- Video Webcam --- */
+    /* ===== VIDEO GRID SIDE BY SIDE ===== */
+    .video-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      width: 100%;
+    }
+
     .video-wrapper {
       width: 100%;
-      border-radius: 40px;
+      border-radius: 32px;
       overflow: hidden;
       box-shadow: 0 16px 32px -12px rgba(90, 50, 30, 0.35);
-      margin-bottom: 0.8rem;
       border: 2px solid rgba(255, 235, 215, 0.5);
       background: #0a0a0a;
       aspect-ratio: 16 / 9;
-      transition: transform 0.2s ease;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
       position: relative;
     }
 
     .video-wrapper:hover {
-      transform: scale(1.005);
+      transform: scale(1.01);
+      box-shadow: 0 20px 40px -12px rgba(90, 50, 30, 0.5);
     }
 
-    .video-wrapper video {
+    .video-wrapper video,
+    .video-wrapper iframe {
       width: 100%;
       height: 100%;
       display: block;
       object-fit: cover;
       background: #1a1a1a;
+      border: none;
     }
 
-    /* Badge HD di pojok video */
-    .hd-badge {
+    /* ===== LABEL VIDEO ===== */
+    .video-label {
       position: absolute;
-      top: 14px;
-      right: 14px;
-      background: rgba(0, 0, 0, 0.7);
+      bottom: 12px;
+      left: 12px;
+      background: rgba(0, 0, 0, 0.75);
       backdrop-filter: blur(8px);
       color: #fff;
-      padding: 4px 12px;
+      padding: 4px 14px;
       border-radius: 30px;
       font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      pointer-events: none;
+    }
+
+    .video-label i {
+      font-size: 0.7rem;
+      color: #4fc3f7;
+    }
+
+    /* ===== BADGE HD ===== */
+    .hd-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      color: #fff;
+      padding: 3px 12px;
+      border-radius: 30px;
+      font-size: 0.65rem;
       font-weight: 700;
       letter-spacing: 0.5px;
       border: 1px solid rgba(255, 255, 255, 0.15);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
       z-index: 2;
       display: flex;
       align-items: center;
@@ -91,47 +128,21 @@
     }
 
     .hd-badge i {
-      font-size: 0.6rem;
+      font-size: 0.5rem;
       color: #ffd700;
     }
 
-    /* Indikator kualitas & status */
-    .quality-control {
-      position: absolute;
-      bottom: 14px;
-      right: 14px;
-      background: rgba(0, 0, 0, 0.6);
-      backdrop-filter: blur(8px);
-      color: #fff;
-      padding: 6px 14px;
-      border-radius: 30px;
-      font-size: 0.7rem;
-      font-weight: 600;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      z-index: 2;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      pointer-events: none;
-      letter-spacing: 0.3px;
-    }
-
-    .quality-control i {
-      color: #4fc3f7;
-      font-size: 0.8rem;
-    }
-
-    /* Status kamera */
+    /* ===== STATUS KAMERA ===== */
     .camera-status {
       position: absolute;
-      top: 14px;
-      left: 14px;
-      background: rgba(0, 0, 0, 0.6);
+      top: 12px;
+      left: 12px;
+      background: rgba(0, 0, 0, 0.7);
       backdrop-filter: blur(8px);
       color: #fff;
       padding: 4px 12px;
       border-radius: 30px;
-      font-size: 0.65rem;
+      font-size: 0.6rem;
       font-weight: 600;
       border: 1px solid rgba(255, 255, 255, 0.1);
       z-index: 2;
@@ -142,8 +153,8 @@
     }
 
     .camera-status .dot {
-      width: 8px;
-      height: 8px;
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
       display: inline-block;
       animation: pulse-dot 1.5s ease-in-out infinite;
@@ -159,11 +170,18 @@
     }
 
     @keyframes pulse-dot {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.5; transform: scale(0.8); }
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+      50% {
+        opacity: 0.5;
+        transform: scale(0.8);
+      }
     }
 
-    /* Tombol kontrol kamera */
+    /* ===== TOMBOL KONTROL KAMERA ===== */
     .camera-controls {
       display: flex;
       justify-content: center;
@@ -190,7 +208,7 @@
       box-shadow: 0 4px 10px -4px rgba(130, 70, 40, 0.06);
     }
 
-    .cam-btn:hover {
+    .cam-btn:hover:not(:disabled) {
       background: rgba(255, 230, 215, 0.8);
       transform: translateY(-2px);
       box-shadow: 0 8px 20px -8px rgba(160, 90, 60, 0.2);
@@ -211,7 +229,7 @@
       color: #fff;
     }
 
-    .cam-btn.start:hover {
+    .cam-btn.start:hover:not(:disabled) {
       background: linear-gradient(135deg, #66bb6a, #43a047);
       box-shadow: 0 8px 20px -8px rgba(76, 175, 80, 0.4);
     }
@@ -226,12 +244,18 @@
       color: #fff;
     }
 
-    .cam-btn.stop:hover {
+    .cam-btn.stop:hover:not(:disabled) {
       background: linear-gradient(135deg, #e57373, #d32f2f);
       box-shadow: 0 8px 20px -8px rgba(239, 83, 80, 0.4);
     }
 
-    /* Avatar */
+    .cam-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    /* ===== AVATAR ===== */
     .avatar-frame {
       position: relative;
       display: inline-block;
@@ -261,6 +285,7 @@
       transform: scale(1.02) rotate(-3deg);
     }
 
+    /* ===== WAVE ICON ===== */
     .wave-icon {
       display: inline-block;
       font-size: 1.9rem;
@@ -270,14 +295,27 @@
     }
 
     @keyframes wave {
-      0% { transform: rotate(0deg); }
-      20% { transform: rotate(16deg); }
-      40% { transform: rotate(-6deg); }
-      60% { transform: rotate(12deg); }
-      80% { transform: rotate(-4deg); }
-      100% { transform: rotate(0deg); }
+      0% {
+        transform: rotate(0deg);
+      }
+      20% {
+        transform: rotate(16deg);
+      }
+      40% {
+        transform: rotate(-6deg);
+      }
+      60% {
+        transform: rotate(12deg);
+      }
+      80% {
+        transform: rotate(-4deg);
+      }
+      100% {
+        transform: rotate(0deg);
+      }
     }
 
+    /* ===== TYPOGRAPHY ===== */
     h1 {
       font-size: 3.6rem;
       font-weight: 700;
@@ -344,6 +382,7 @@
       margin: 0 4px;
     }
 
+    /* ===== FEATURE GRID ===== */
     .feature-grid {
       display: flex;
       flex-wrap: wrap;
@@ -381,6 +420,7 @@
       box-shadow: 0 12px 20px -10px rgba(160, 90, 60, 0.15);
     }
 
+    /* ===== TOMBOL INSTAGRAM ===== */
     .ig-button {
       display: inline-flex;
       align-items: center;
@@ -417,6 +457,7 @@
       transform: scale(1.1) rotate(-4deg);
     }
 
+    /* ===== FOOTER ===== */
     .footnote {
       margin-top: 2.4rem;
       font-size: 0.9rem;
@@ -445,285 +486,315 @@
       font-size: 0.9rem;
     }
 
-    /* Responsive */
-    @media (max-width: 600px) {
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+      .video-grid {
+        grid-template-columns: 1fr;
+        gap: 0.8rem;
+      }
+
       .card {
         padding: 1.2rem 1rem 2rem;
         border-radius: 32px;
       }
+
       h1 {
         font-size: 2.6rem;
       }
+
       .badge-profesi {
         font-size: 1.1rem;
         padding: 0.4rem 1.4rem;
       }
+
       .bio {
         font-size: 0.95rem;
         padding: 0.8rem 1.2rem;
       }
+
       .avatar {
         width: 90px;
         height: 90px;
         font-size: 3rem;
       }
+
       .feature-grid {
         gap: 0.5rem;
       }
+
       .feature-item {
         padding: 0.3rem 1rem 0.3rem 0.8rem;
         font-size: 0.85rem;
       }
+
       .ig-button {
         padding: 0.6rem 1.8rem;
         font-size: 0.95rem;
         gap: 10px;
       }
+
       .ig-button i {
         font-size: 1.2rem;
       }
+
       .video-wrapper {
-        border-radius: 28px;
-        margin-bottom: 0.8rem;
+        border-radius: 24px;
       }
+
       .hd-badge {
         top: 10px;
         right: 10px;
         padding: 3px 10px;
-        font-size: 0.6rem;
+        font-size: 0.55rem;
       }
-      .quality-control {
-        bottom: 10px;
-        right: 10px;
-        padding: 4px 10px;
-        font-size: 0.6rem;
-      }
+
       .camera-status {
         top: 10px;
         left: 10px;
         padding: 3px 10px;
-        font-size: 0.55rem;
+        font-size: 0.5rem;
       }
+
+      .video-label {
+        bottom: 10px;
+        left: 10px;
+        padding: 3px 10px;
+        font-size: 0.6rem;
+      }
+
       .cam-btn {
         padding: 0.4rem 1.2rem;
         font-size: 0.8rem;
       }
     }
 
-    @media (max-width: 420px) {
+    @media (max-width: 480px) {
       .card {
         padding: 1rem 0.8rem 1.8rem;
       }
+
       h1 {
         font-size: 2.2rem;
       }
+
       .badge-profesi {
         font-size: 0.95rem;
         padding: 0.3rem 1rem;
       }
+
       .video-wrapper {
-        border-radius: 20px;
+        border-radius: 18px;
       }
+
       .hd-badge {
         top: 8px;
         right: 8px;
         padding: 2px 8px;
-        font-size: 0.5rem;
+        font-size: 0.45rem;
       }
-      .quality-control {
-        display: none;
+
+      .camera-status {
+        top: 8px;
+        left: 8px;
+        padding: 2px 8px;
+        font-size: 0.45rem;
+      }
+
+      .video-label {
+        bottom: 8px;
+        left: 8px;
+        padding: 2px 8px;
+        font-size: 0.5rem;
       }
     }
   </style>
 </head>
 <body>
   <div class="card">
-    <!-- === VIDEO WEBCAM === -->
-    <div class="video-wrapper">
-      <video id="webcam" autoplay playsinline muted></video>
-      
-      <!-- Badge HD -->
+    <!-- ===== VIDEO GRID SIDE BY SIDE ===== -->
+    <div class="video-grid">
+      <!-- Video 1: Webcam Laptop -->
+      <div class="video-wrapper">
+        <video id="webcam" autoplay playsinline muted></video>
+
+        <div class="hd-badge">
+          <i class="fas fa-star"></i> HD
+        </div>
+
+        <div class="camera-status" id="cameraStatus">
+          <span class="dot inactive" id="statusDot"></span>
+          <span id="statusText">Offline</span>
+        </div>
+
+        <div class="video-label">
+          <i class="fas fa-camera"></i> Webcam
+        </div>
+      </div>
+
+      <!-- Video 2: Stream dari IP -->
+      <div class="video-wrapper">
+        <iframe src="http://10.101.209.89"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+        allowfullscreen loading="lazy" title="Live Streaming"
+        sandbox="allow-same-origin allow-scripts allow-popups allow-forms">
+      </iframe>
+
       <div class="hd-badge">
-        <i class="fas fa-star"></i> HD <i class="fas fa-star" style="margin-left:2px;"></i>
-      </div>
-      
-      <!-- Indikator kualitas -->
-      <div class="quality-control">
-        <i class="fas fa-cog"></i> 1080p
+        <i class="fas fa-star"></i> HD
       </div>
 
-      <!-- Status kamera -->
-      <div class="camera-status" id="cameraStatus">
-        <span class="dot inactive" id="statusDot"></span>
-        <span id="statusText">Offline</span>
+      <div class="video-label">
+        <i class="fas fa-video"></i> Live Stream
       </div>
-    </div>
-
-    <!-- Kontrol Kamera -->
-    <div class="camera-controls">
-      <button class="cam-btn start" id="startBtn">
-        <i class="fas fa-play"></i> Mulai Kamera
-      </button>
-      <button class="cam-btn stop" id="stopBtn">
-        <i class="fas fa-stop"></i> Hentikan
-      </button>
-    </div>
-
-    <!-- Avatar -->
-    <div class="avatar-frame">
-      <div class="avatar">
-        <i class="fas fa-pen-fancy"></i>
-      </div>
-    </div>
-
-    <!-- Nama -->
-    <h1>
-      <span class="highlight">Caca Cans</span>
-      <span class="wave-icon">👋</span>
-    </h1>
-
-    <!-- Profesi -->
-    <div class="badge-profesi">
-      <i class="fas fa-sync-alt fa-fw"></i> Update Kehidupan
-    </div>
-
-    <div class="divider"></div>
-
-    <!-- Deskripsi -->
-    <div class="bio">
-      <i class="fas fa-quote-left" style="opacity:0.4; margin-right: 6px;"></i>
-      Menulis ulang cerita, satu <i class="fas fa-heart" style="color:#d47a62;"></i> 
-      momen berharga dalam keseharian.
-      <i class="fas fa-quote-right" style="opacity:0.4; margin-left: 6px;"></i>
-    </div>
-
-    <!-- Grid fitur -->
-    <div class="feature-grid">
-      <div class="feature-item">
-        <i class="fas fa-camera-retro"></i> Momen
-      </div>
-      <div class="feature-item">
-        <i class="fas fa-pencil-alt"></i> Catatan
-      </div>
-      <div class="feature-item">
-        <i class="fas fa-smile-beam"></i> Cerita
-      </div>
-      <div class="feature-item">
-        <i class="fas fa-seedling"></i> Tumbuh
-      </div>
-    </div>
-
-    <!-- Instagram -->
-    <a href="https://instagram.com/aprfkalista" target="_blank" class="ig-button">
-      <i class="fab fa-instagram"></i> @aprfkalista
-      <i class="fas fa-arrow-right" style="font-size:1rem; opacity:0.8;"></i>
-    </a>
-
-    <!-- Footer -->
-    <div class="footnote">
-      <span><i class="fas fa-calendar-check"></i> #HariIni</span>
-      <span><i class="fas fa-hashtag"></i> #KehidupanCaca</span>
-      <span><i class="fas fa-mug-hot"></i> setiap hari</span>
-      <span><i class="fas fa-hdmi"></i> HD</span>
     </div>
   </div>
 
-  <script>
-    // --- JavaScript untuk mengontrol kamera ---
-    const video = document.getElementById('webcam');
-    const startBtn = document.getElementById('startBtn');
-    const stopBtn = document.getElementById('stopBtn');
-    const statusDot = document.getElementById('statusDot');
-    const statusText = document.getElementById('statusText');
+  <!-- ===== KONTROL KAMERA ===== -->
+  <div class="camera-controls">
+    <button class="cam-btn start" id="startBtn">
+      <i class="fas fa-play"></i> Mulai Kamera
+    </button>
+    <button class="cam-btn stop" id="stopBtn">
+      <i class="fas fa-stop"></i> Hentikan
+    </button>
+  </div>
 
-    let stream = null;
+  <!-- ===== AVATAR ===== -->
+  <div class="avatar-frame">
+    <div class="avatar">
+      <i class="fas fa-pen-fancy"></i>
+    </div>
+  </div>
 
-    // Fungsi untuk update status
-    function updateStatus(isActive) {
-      if (isActive) {
-        statusDot.className = 'dot active';
-        statusText.textContent = 'Online';
-        statusText.style.color = '#4caf50';
-      } else {
-        statusDot.className = 'dot inactive';
-        statusText.textContent = 'Offline';
-        statusText.style.color = '#fff';
-      }
+  <!-- ===== NAMA ===== -->
+  <h1>
+    <span class="highlight">Caca Cans</span>
+    <span class="wave-icon">👋</span>
+  </h1>
+
+  <!-- ===== PROFESI ===== -->
+  <div class="badge-profesi">
+    <i class="fas fa-sync-alt fa-fw"></i> Update Kehidupan
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ===== BIO ===== -->
+  <div class="bio">
+    <i class="fas fa-quote-left" style="opacity:0.4; margin-right: 6px;"></i>
+    Menulis ulang cerita, satu <i class="fas fa-heart" style="color:#d47a62;"></i>
+    momen berharga dalam keseharian.
+    <i class="fas fa-quote-right" style="opacity:0.4; margin-left: 6px;"></i>
+  </div>
+
+  <!-- ===== FEATURE GRID ===== -->
+  <div class="feature-grid">
+    <div class="feature-item">
+      <i class="fas fa-camera-retro"></i> Momen
+    </div>
+    <div class="feature-item">
+      <i class="fas fa-pencil-alt"></i> Catatan
+    </div>
+    <div class="feature-item">
+      <i class="fas fa-smile-beam"></i> Cerita
+    </div>
+    <div class="feature-item">
+      <i class="fas fa-seedling"></i> Tumbuh
+    </div>
+  </div>
+
+  <!-- ===== INSTAGRAM ===== -->
+  <a href="https://instagram.com/aprfkalista" target="_blank" class="ig-button">
+    <i class="fab fa-instagram"></i> @aprfkalista
+    <i class="fas fa-arrow-right" style="font-size:1rem; opacity:0.8;"></i>
+  </a>
+
+  <!-- ===== FOOTER ===== -->
+  <div class="footnote">
+    <span><i class="fas fa-calendar-check"></i> #HariIni</span>
+    <span><i class="fas fa-hashtag"></i> #KehidupanCaca</span>
+    <span><i class="fas fa-mug-hot"></i> setiap hari</span>
+    <span><i class="fas fa-hdmi"></i> HD</span>
+  </div>
+</div>
+
+<!-- ===== JAVASCRIPT KONTROL KAMERA ===== -->
+<script>
+  // ===== ELEMEN =====
+  const video = document.getElementById('webcam');
+  const startBtn = document.getElementById('startBtn');
+  const stopBtn = document.getElementById('stopBtn');
+  const statusDot = document.getElementById('statusDot');
+  const statusText = document.getElementById('statusText');
+
+  let stream = null;
+
+  // ===== FUNGSI UPDATE STATUS =====
+  function updateStatus(isActive) {
+    if (isActive) {
+      statusDot.className = 'dot active';
+      statusText.textContent = 'Online';
+      statusText.style.color = '#4caf50';
+    } else {
+      statusDot.className = 'dot inactive';
+      statusText.textContent = 'Offline';
+      statusText.style.color = '#fff';
     }
+  }
 
-    // Mulai kamera
-    async function startCamera() {
-      try {
-        // Minta akses kamera dengan kualitas tinggi
-        stream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            width: { ideal: 1920 },
-            height: { ideal: 1080 },
-            facingMode: 'user',
-            frameRate: { ideal: 30 }
-          },
-          audio: false
-        });
+  // ===== MULAI KAMERA =====
+  async function startCamera() {
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          width: { ideal: 1920 },
+          height: { ideal: 1080 },
+          facingMode: 'user',
+          frameRate: { ideal: 30 }
+        },
+        audio: false
+      });
 
-        video.srcObject = stream;
-        await video.play();
-        updateStatus(true);
-        startBtn.disabled = true;
-        startBtn.style.opacity = '0.5';
-        startBtn.style.cursor = 'default';
-        stopBtn.disabled = false;
-        stopBtn.style.opacity = '1';
-        stopBtn.style.cursor = 'pointer';
-
-        console.log('📷 Kamera berhasil diaktifkan dalam mode HD');
-      } catch (err) {
-        console.error('❌ Gagal mengakses kamera:', err);
-        alert('Tidak dapat mengakses kamera. Pastikan Anda telah mengizinkan akses kamera dan tidak ada aplikasi lain yang menggunakan kamera.');
-        updateStatus(false);
-        startBtn.disabled = false;
-        startBtn.style.opacity = '1';
-        startBtn.style.cursor = 'pointer';
-      }
-    }
-
-    // Hentikan kamera
-    function stopCamera() {
-      if (stream) {
-        stream.getTracks().forEach(track => track.stop());
-        stream = null;
-        video.srcObject = null;
-        updateStatus(false);
-        startBtn.disabled = false;
-        startBtn.style.opacity = '1';
-        startBtn.style.cursor = 'pointer';
-        stopBtn.disabled = true;
-        stopBtn.style.opacity = '0.5';
-        stopBtn.style.cursor = 'default';
-        console.log('📷 Kamera dihentikan');
-      }
-    }
-
-    // Event listener untuk tombol
-    startBtn.addEventListener('click', startCamera);
-    stopBtn.addEventListener('click', stopCamera);
-
-    // Set initial state
-    stopBtn.disabled = true;
-    stopBtn.style.opacity = '0.5';
-    stopBtn.style.cursor = 'default';
-    updateStatus(false);
-
-    // Cek apakah browser mendukung getUserMedia
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      alert('Browser Anda tidak mendukung akses kamera. Silakan gunakan browser modern seperti Chrome, Firefox, atau Edge.');
+      video.srcObject = stream;
+      await video.play();
+      updateStatus(true);
       startBtn.disabled = true;
-      startBtn.style.opacity = '0.5';
-      startBtn.style.cursor = 'default';
+      stopBtn.disabled = false;
+      console.log('📷 Kamera berhasil diaktifkan dalam mode HD');
+    } catch (err) {
+      console.error('❌ Gagal mengakses kamera:', err);
+      alert('Tidak dapat mengakses kamera. Pastikan Anda telah mengizinkan akses kamera dan tidak ada aplikasi lain yang menggunakan kamera.');
+      updateStatus(false);
+      startBtn.disabled = false;
     }
+  }
 
-    // Auto-start kamera saat halaman dimuat (opsional)
-    // Uncomment baris di bawah jika ingin kamera langsung menyala
-    // setTimeout(startCamera, 500);
-  </script>
+  // ===== HENTIKAN KAMERA =====
+  function stopCamera() {
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+      stream = null;
+      video.srcObject = null;
+      updateStatus(false);
+      startBtn.disabled = false;
+      stopBtn.disabled = true;
+      console.log('📷 Kamera dihentikan');
+    }
+  }
+
+  // ===== EVENT LISTENER =====
+  startBtn.addEventListener('click', startCamera);
+  stopBtn.addEventListener('click', stopCamera);
+
+  // ===== STATE AWAL =====
+  stopBtn.disabled = true;
+  updateStatus(false);
+
+  // ===== CEK DUKUNGAN BROWSER =====
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    alert('Browser Anda tidak mendukung akses kamera. Silakan gunakan browser modern seperti Chrome, Firefox, atau Edge.');
+    startBtn.disabled = true;
+  }
+</script>
 </body>
 </html>
